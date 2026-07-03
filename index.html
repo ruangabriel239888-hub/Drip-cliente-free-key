@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drip Client | Secure Key Gen</title>
+    <style>
+        :root {
+            --neon-green: #00ff00;
+            --neon-purple: #bc13fe;
+            --bg-color: #050505;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--neon-green);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            background: rgba(10, 10, 10, 0.95);
+            border: 2px solid var(--neon-purple);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(188, 19, 254, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+        }
+
+        h1 { color: var(--neon-purple); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px; }
+
+        .status-box { margin: 20px 0; border: 1px solid var(--neon-green); padding: 15px; border-radius: 5px; }
+
+        .progress-bar { background: #111; height: 10px; width: 100%; margin: 10px 0; border-radius: 5px; overflow: hidden; }
+        #progress { height: 100%; width: 0%; background: var(--neon-green); transition: width 0.5s; }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid var(--neon-green);
+            background: transparent;
+            color: var(--neon-green);
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        button:hover:not(:disabled) { background: var(--neon-green); color: black; }
+        button:disabled { border-color: #444; color: #444; cursor: not-allowed; }
+
+        #btn-generate { border-color: var(--neon-purple); color: var(--neon-purple); }
+        #btn-generate:hover:not(:disabled) { background: var(--neon-purple); color: white; }
+
+        .key-output { font-size: 1.5rem; margin: 20px 0; color: white; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Drip Client</h1>
+        <p>Generador de Keys - Acceso VIP</p>
+
+        <div class="status-box">
+            <p id="status-text">Comparte 5 veces para desbloquear.</p>
+            <div class="progress-bar"><div id="progress"></div></div>
+            <p id="counter-text">Progreso: 0/5</p>
+        </div>
+
+        <button onclick="shareLink()">Compartir Ahora (WhatsApp)</button>
+        <button id="btn-generate" onclick="generateKey()" disabled>Generar Key</button>
+
+        <div id="key-display" class="key-output"></div>
+    </div>
+
+    <script>
+        let shares = parseInt(localStorage.getItem('drip_shares')) || 0;
+        const TARGET = 5;
+
+        function updateUI() {
+            const progress = (shares / TARGET) * 100;
+            document.getElementById('progress').style.width = progress + "%";
+            document.getElementById('counter-text').innerText = `Progreso: ${shares}/${TARGET}`;
+            
+            const btnGen = document.getElementById('btn-generate');
+            if (shares >= TARGET) {
+                btnGen.disabled = false;
+                document.getElementById('status-text').innerText = "¡Meta alcanzada! Generar clave.";
+            } else {
+                btnGen.disabled = true;
+            }
+        }
+
+        function shareLink() {
+            shares++;
+            localStorage.setItem('drip_shares', shares);
+            updateUI();
+            
+            const msg = encodeURIComponent("¡Únete al canal Y obtén Regedist, aimbots y keys gratis aquí! https://whatsapp.com/channel/0029Vac3yEGElagvsRDWdV2k");
+            window.open(`https://wa.me/?text=${msg}`, '_blank');
+        }
+
+        function generateKey() {
+            if (shares >= TARGET) {
+                // Genera un número aleatorio de 8 dígitos
+                const key = Math.floor(10000000 + Math.random() * 90000000).toString();
+                
+                // Mostrar Key
+                const display = document.getElementById('key-display');
+                display.innerText = "KEY: " + key;
+                display.style.display = "block";
+                
+                // Reiniciar contador
+                shares = 0;
+                localStorage.setItem('drip_shares', 0);
+                updateUI();
+                alert("¡Clave generada! Necesitas compartir de nuevo para obtener otra.");
+            }
+        }
+
+        // Iniciar
+        updateUI();
+    </script>
+</body>
+</html>
